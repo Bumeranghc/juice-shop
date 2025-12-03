@@ -29,6 +29,11 @@ on:
                 default: false
                 required: true
 
+permissions:
+  actions: write
+  packages: write
+  contents: read
+
 env:
   GITHUB_DOCKER_REGISTRY: 'ghcr.io/bumeranghc'
 
