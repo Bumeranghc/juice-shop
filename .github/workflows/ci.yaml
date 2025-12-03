@@ -18,6 +18,11 @@ on:
                 type: boolean
                 default: false
                 required: true
+            sbom:
+                description: sbom
+                type: boolean
+                default: false
+                required: true
 
 jobs:
     secrets_scan:
@@ -57,3 +62,25 @@ jobs:
           with:
             name: semgrep-results.sarif
             path: semgrep-results.sarif
+
+    sbom:
+        name: sbom
+        if: inputs.sbom
+        runs-on: ubuntu-latest
+        container: node:22
+        steps:
+        - uses: actions/checkout@v5
+          with:
+            fetch-depth: 0        
+        
+        - run: |
+            npm --version
+            node --version
+            npm install --package-lock-only --ignore-scripts --no-audit
+            npm install -g @cyclonedx/cyclonedx-npm
+            cyclonedx-npm --package-lock-only -o sbom-packages.cdx.json
+
+        - uses: actions/upload-artifact@v5
+          with:
+            name: sbom-packages.cdx.json
+            path: sbom-packages.cdx.json
