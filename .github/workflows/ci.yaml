@@ -15,3 +15,8 @@ jobs:
         - uses: gitleaks/gitleaks-action@v2
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        - uses: trufflesecurity/trufflehog@main
+          if: always()
+          with:
+            extra_args: --results=verified,unknown    
