@@ -29,6 +29,9 @@ on:
                 default: false
                 required: true
 
+env:
+  GITHUB_DOCKER_REGISTRY: 'ghcr.io/bumeranghc'
+
 jobs:
     secrets_scan:
         name: secrets_scan
@@ -105,3 +108,40 @@ jobs:
           with:
             name: trivy-results.sarif
             path: trivy-results.sarif
+
+    docker_build_and_push:
+        name: docker_build_and_push
+        runs-on: ubuntu-latest            
+        steps:
+            - name: Login to GitHUb
+              uses: docker/login-action@v3
+              with:
+                registry: ghcr.io
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: select docker driver
+              run: |
+                docker buildx create --use --driver=docker-container
+
+            - name: Docker meta
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                images: bumeranghc/juicy-shop
+
+            - name: Lowercase container registry
+              id: github_container_registry
+              run: |
+                echo "repository=${GITHUB_DOCKER_REGISTRY,,}" >>${GITHUB_OUTPUT}
+
+            - name: Build and push
+              uses: docker/build-push-action@v6
+              with:
+                context: ${{github.workspace}}
+                file: Dockerfile
+                push: true
+                tags: ${{steps.github_container_registry.outputs.repository}}/juicy-shop:${{ github.run_number }}
+                cache-from: type=gha
+                cache-to: type=gha,mode=max
+                labels: ${{steps.meta.outputs.labels}}
