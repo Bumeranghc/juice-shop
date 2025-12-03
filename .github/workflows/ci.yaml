@@ -23,6 +23,11 @@ on:
                 type: boolean
                 default: false
                 required: true
+            trivy:
+                description: trivy
+                type: boolean
+                default: false
+                required: true
 
 jobs:
     secrets_scan:
@@ -79,8 +84,24 @@ jobs:
             npm install --package-lock-only --ignore-scripts --no-audit
             npm install -g @cyclonedx/cyclonedx-npm
             cyclonedx-npm --package-lock-only -o sbom-packages.cdx.json
+            npm ci
+
+        - name: Run Trivy vulnerability scanner in repo mode
+          if: inputs.trivy
+          uses: aquasecurity/trivy-action@0.33.1
+          with:
+            scan-type: 'fs'
+            ignore-unfixed: true
+            format: 'sarif'
+            output: 'trivy-results.sarif'
+            severity: 'CRITICAL'
 
         - uses: actions/upload-artifact@v5
           with:
             name: sbom-packages.cdx.json
             path: sbom-packages.cdx.json
+
+        - uses: actions/upload-artifact@v5
+          with:
+            name: trivy-results.sarif
+            path: trivy-results.sarif
