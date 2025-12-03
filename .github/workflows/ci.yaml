@@ -79,7 +79,7 @@ jobs:
         steps:
         - uses: actions/checkout@v5
           with:
-            fetch-depth: 0        
+            fetch-depth: 0
         
         - run: |
             npm --version
@@ -113,6 +113,10 @@ jobs:
         name: docker_build_and_push
         runs-on: ubuntu-latest            
         steps:
+            - uses: actions/checkout@v5
+              with:
+                fetch-depth: 0
+
             - name: Login to GitHUb
               uses: docker/login-action@v3
               with:
