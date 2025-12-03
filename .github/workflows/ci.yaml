@@ -27,7 +27,11 @@ jobs:
         runs-on: ubuntu-latest
         container: semgrep/semgrep:latest
         steps:
-            - run: |
-                semgrep --version
-                semgrep scan --config=auto . --sarif semgrep-results.sarif .
-                cat semgrep-results.sarif
+        - uses: actions/checkout@v5
+          with:
+            fetch-depth: 0
+                    
+        - run: |
+            semgrep --version
+            semgrep scan --config=auto . --sarif . > semgrep-results.sarif
+            cat semgrep-results.sarif
