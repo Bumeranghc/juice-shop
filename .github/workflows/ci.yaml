@@ -19,4 +19,4 @@ jobs:
         - uses: trufflesecurity/trufflehog@main
           if: always()
           with:
-            extra_args: --results=verified,unknown    
+            extra_args: --json
