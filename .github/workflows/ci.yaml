@@ -19,4 +19,15 @@ jobs:
         - uses: trufflesecurity/trufflehog@main
           if: always()
           with:
-            extra_args: --json
+            extra_args: --results=verified,unknown
+
+    sast:
+        name: semgrep
+        if: always()
+        runs-on: ubuntu-latest
+        container: semgrep/semgrep:latest
+        steps:
+            - run: |
+                semgrep --version
+                semgrep scan --config=auto . --sarif semgrep-results.sarif .
+                cat semgrep-results.sarif
