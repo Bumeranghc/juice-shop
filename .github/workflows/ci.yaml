@@ -21,7 +21,7 @@ on:
 
 jobs:
     secrets_scan:
-        name: gitleaks
+        name: secrets_scan
         if: inputs.gitleaks || inputs.trufflehog
         runs-on: ubuntu-latest
         steps:
