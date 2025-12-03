@@ -2,10 +2,27 @@ name: DevSecOps Example Workflows
 
 on:
     workflow_dispatch:
+        inputs:
+            gitleaks:
+                description: gitleaks
+                type: boolean
+                default: false
+                required: true
+            trufflehog:
+                description: trufflehog
+                type: boolean
+                default: false
+                required: true
+            semgrep:
+                description: semgrep
+                type: boolean
+                default: false
+                required: true
 
 jobs:
     secrets_scan:
         name: gitleaks
+        if: inputs.gitleaks || inputs.trufflehog
         runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v5
@@ -13,17 +30,18 @@ jobs:
             fetch-depth: 0
 
         - uses: gitleaks/gitleaks-action@v2
+          if: inputs.gitleaks
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
         - uses: trufflesecurity/trufflehog@main
-          if: always()
+          if: always() && inputs.trufflehog
           with:
             extra_args: --results=verified,unknown
 
     sast:
         name: semgrep
-        if: always()
+        if: inputs.semgrep
         runs-on: ubuntu-latest
         container: semgrep/semgrep:latest
         steps:
@@ -34,4 +52,8 @@ jobs:
         - run: |
             semgrep --version
             semgrep scan --config=auto . --sarif . > semgrep-results.sarif
-            cat semgrep-results.sarif
+
+        - uses: actions/upload-artifact@v5
+          with:
+            name: semgrep-results.sarif
+            path: semgrep-results.sarif
