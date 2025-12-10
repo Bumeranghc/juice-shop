@@ -234,6 +234,10 @@ jobs:
         if: inputs.zap
         runs-on: ubuntu-latest
         steps:
+            - uses: actions/checkout@v5
+              with:
+                fetch-depth: 0
+
             - name: Prepare variables
               id: zap_variables
               run: |
