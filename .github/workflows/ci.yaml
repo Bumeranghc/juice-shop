@@ -156,12 +156,13 @@ jobs:
         - name: Run OWASP Dependency Check
           run: |
             DC_DIRECTORY="$(pwd)"
+            DC_VERSION="${{ inputs.dc-version}}"
             DC_PROJECT="dependency-check scan: $(pwd)"
             DATA_DIRECTORY="$DC_DIRECTORY/owasp-data"
             CACHE_DIRECTORY="$DC_DIRECTORY/owasp-data/cache"
             REPORTS_DIRECTORY="$DC_DIRECTORY/odc-reports"
             mkdir -p "$DATA_DIRECTORY" "$CACHE_DIRECTORY" "$REPORTS_DIRECTORY"           
-            docker pull owasp/dependency-check:${{ inputs.dc-version}}
+            docker pull owasp/dependency-check:$DC_VERSION
             docker run --rm \
                 -e user=$USER \
                 -u $(id -u ${USER}):$(id -g ${USER}) \
