@@ -167,7 +167,7 @@ jobs:
                 -u $(id -u ${USER}):$(id -g ${USER}) \
                 --volume "$DC_DIRECTORY":/src:z \
                 --volume "$DATA_DIRECTORY":/usr/share/dependency-check/data:z \
-                --volume "$REPORTS_DIRECTORYs:/report:z \
+                --volume "$REPORTS_DIRECTORY":/report:z \
                 owasp/dependency-check:$DC_VERSION \
                 --scan /src \
                 --format "HTML" \
