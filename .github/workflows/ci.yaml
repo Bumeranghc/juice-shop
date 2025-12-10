@@ -46,6 +46,11 @@ on:
                 type: boolean
                 default: false
                 required: true
+            zap:
+                description: zap
+                type: boolean
+                default: false
+                required: true
 
 permissions:
   actions: write
@@ -176,6 +181,7 @@ jobs:
                 --out /report
         
         - uses: actions/upload-artifact@v5
+          if: always()
           with:
             name: owasp-depcheck-report
             path: odc-reports
@@ -220,3 +226,41 @@ jobs:
                 cache-from: type=gha
                 cache-to: type=gha,mode=max
                 labels: ${{steps.meta.outputs.labels}}
+                build-args: NODE_VERSION=${{ inputs.node-version }}
+
+    dast:
+        name: zap
+        needs: docker_build_and_push
+        if: inputs.zap
+        runs-on: ubuntu-latest
+        steps:
+            - name: Prepare variables
+              id: zap_variables
+              run: |
+                ZAP_REPORTS="./zap-reports"
+                mkdir -p $ZAP_REPORTS
+                echo "zap_scan_report=zap-report.html" >>${GITHUB_OUTPUT}
+                echo "zap_scan_results=$ZAP_REPORTS" >>${GITHUB_OUTPUT}
+                echo "image_tag=${GITHUB_DOCKER_REGISTRY,,}/juicy-shop:${{ github.run_number }}" >>${GITHUB_OUTPUT}
+
+            - name: Login to GitHUb
+              uses: docker/login-action@v3
+              with:
+                registry: ghcr.io
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Run DAST with OWASP ZAP
+              run:
+                docker compose -p zap-juice-shop-${{ github.run_number }} -f docker-compose.dast.yml up zap
+                docker compose -p zap-juice-shop-${{ github.run_number }} down
+              env:
+                ZAP_SCAN_REPORT: ${{ steps.zap_variables.outputs.zap_scan_report }}
+                ZAP_SCAN_RESULTS: ${{ steps.zap_variables.outputs.zap_scan_results }}
+                IMAGE_TAG: ${{ steps.zap_variables.outputs.image_tag }}
+
+            - uses: actions/upload-artifact@v5
+              if: always()
+              with:
+                name: zap-dast-report
+                path: zap-reports
