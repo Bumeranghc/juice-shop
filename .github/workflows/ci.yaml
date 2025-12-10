@@ -251,7 +251,7 @@ jobs:
                 password: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Run DAST with OWASP ZAP
-              run:
+              run: |
                 docker compose -p zap-juice-shop-${{ github.run_number }} -f docker-compose.dast.yml up zap
                 docker compose -p zap-juice-shop-${{ github.run_number }} down
               env:
