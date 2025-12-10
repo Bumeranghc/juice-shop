@@ -146,17 +146,13 @@ jobs:
           with:
             node-version: "${{ inputs.node-version }}"
      
-        - name: Install dependencies
+        - name: Install dependencies and build project
           run: |
             npm --version
             node --version
             npm install --package-lock-only --ignore-scripts --no-audit
             npm ci
-        
-        - name: Build project
-          run: |
-            npm run package:ci
-        
+
         - name: Run OWASP Dependency Check
           run: |
             DC_DIRECTORY="$(pwd)"
